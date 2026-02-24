@@ -10,9 +10,10 @@ interface RowProps {
   isSubmitted: boolean;
   shake?: boolean;
   isWinningRow?: boolean;
+  isOpponent?: boolean;
 }
 
-export default function Row({ guess, solution, isCurrentRow, isSubmitted, shake, isWinningRow }: RowProps) {
+export default function Row({ guess, solution, isCurrentRow, isSubmitted, shake, isWinningRow, isOpponent }: RowProps) {
   const paddedGuess = guess.padEnd(5, ' ');
   const statuses = isSubmitted ? evaluateGuess(guess, solution) : Array(5).fill('empty');
   
@@ -47,6 +48,7 @@ export default function Row({ guess, solution, isCurrentRow, isSubmitted, shake,
             animateFlip={isSubmitted}
             animateBounce={doBounce}
             animationDelay={doBounce ? i * 100 : isSubmitted ? i * 300 : 0}
+            isOpponent={isOpponent}
           />
         );
       })}

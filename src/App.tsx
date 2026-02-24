@@ -253,8 +253,36 @@ export default function App() {
 
       <Toast message={toastMessage} />
 
-      <div className="flex-grow flex flex-row overflow-hidden">
-        <main className="flex-grow flex flex-col items-center justify-between w-full max-w-[500px] mx-auto pt-8 pb-4">
+      <div className="flex-grow flex flex-row overflow-hidden relative">
+        {/* Floating Opponent Badges */}
+        <div className="absolute left-2 sm:left-4 top-4 bottom-4 w-16 sm:w-20 flex flex-col gap-3 overflow-y-auto pointer-events-none z-20">
+          {Object.entries(opponents).map(([id, grid]) => {
+            const opponentGuesses = (grid as any[]).map(row => row.map((cell: any) => cell.char).join(''));
+            const hasWon = opponentGuesses.length > 0 && opponentGuesses[opponentGuesses.length - 1] === solution;
+            
+            return (
+              <div key={id} className="flex flex-col items-center bg-white/90 backdrop-blur-sm p-1.5 sm:p-2 rounded-xl shadow-sm border border-gray-200 pointer-events-auto">
+                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-wider">
+                  {id.slice(0, 4)}
+                </div>
+                <div className="flex justify-center h-[55px] sm:h-[65px] overflow-hidden">
+                  <div className="transform scale-[0.13] sm:scale-[0.15] origin-top w-[350px]">
+                    <Board
+                      guesses={opponentGuesses}
+                      currentGuess=""
+                      solution={solution}
+                      shakeRowIndex={null}
+                      winRowIndex={hasWon ? opponentGuesses.length - 1 : null}
+                      isOpponent={true}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <main className="flex-grow flex flex-col items-center justify-between w-full max-w-[500px] mx-auto pt-8 pb-4 relative z-10">
           <Board
             guesses={guesses}
             currentGuess={currentGuess}
@@ -269,37 +297,6 @@ export default function App() {
             keyStatuses={keyStatuses}
           />
         </main>
-
-        <aside className="w-64 border-l border-[#d3d6da] p-4 overflow-y-auto hidden md:block bg-gray-50">
-          <h2 className="text-lg font-bold mb-4 uppercase tracking-wider text-gray-700">Opponents</h2>
-          {Object.entries(opponents).length === 0 ? (
-            <div className="text-sm text-gray-500 italic">Waiting for players...</div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {Object.entries(opponents).map(([id, grid]) => {
-                const opponentGuesses = (grid as any[]).map(row => row.map((cell: any) => cell.char).join(''));
-                const hasWon = opponentGuesses.length > 0 && opponentGuesses[opponentGuesses.length - 1] === solution;
-                
-                return (
-                  <div key={id} className="bg-white p-3 rounded shadow-sm border border-gray-200">
-                    <div className="font-bold text-gray-800 mb-2 text-sm text-center">Opponent {id.slice(0, 4)}</div>
-                    <div className="flex justify-center h-[160px] overflow-hidden pointer-events-none">
-                      <div className="transform scale-[0.4] origin-top w-[350px]">
-                        <Board
-                          guesses={opponentGuesses}
-                          currentGuess=""
-                          solution={solution}
-                          shakeRowIndex={null}
-                          winRowIndex={hasWon ? opponentGuesses.length - 1 : null}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </aside>
       </div>
     </div>
   );

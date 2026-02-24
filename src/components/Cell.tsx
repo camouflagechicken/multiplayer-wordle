@@ -9,9 +9,10 @@ interface CellProps {
   animateFlip?: boolean;
   animateBounce?: boolean;
   animationDelay?: number;
+  isOpponent?: boolean;
 }
 
-export default function Cell({ value, status, animatePop, animateFlip, animateBounce, animationDelay = 0 }: CellProps) {
+export default function Cell({ value, status, animatePop, animateFlip, animateBounce, animationDelay = 0, isOpponent }: CellProps) {
   const [displayStatus, setDisplayStatus] = useState<LetterState>(animateFlip ? 'tbd' : status);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function Cell({ value, status, animatePop, animateFlip, animateBo
 
   return (
     <div className={classes} style={style}>
-      {value}
+      {isOpponent ? '' : value}
     </div>
   );
 }

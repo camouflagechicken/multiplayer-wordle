@@ -7,9 +7,10 @@ interface BoardProps {
   solution: string;
   shakeRowIndex: number | null;
   winRowIndex: number | null;
+  isOpponent?: boolean;
 }
 
-export default function Board({ guesses, currentGuess, solution, shakeRowIndex, winRowIndex }: BoardProps) {
+export default function Board({ guesses, currentGuess, solution, shakeRowIndex, winRowIndex, isOpponent }: BoardProps) {
   const empties = Array(Math.max(0, 5 - guesses.length)).fill('');
 
   return (
@@ -22,6 +23,7 @@ export default function Board({ guesses, currentGuess, solution, shakeRowIndex, 
           isCurrentRow={false}
           isSubmitted={true}
           isWinningRow={winRowIndex === i}
+          isOpponent={isOpponent}
         />
       ))}
       {guesses.length < 6 && (
@@ -31,6 +33,7 @@ export default function Board({ guesses, currentGuess, solution, shakeRowIndex, 
           isCurrentRow={true}
           isSubmitted={false}
           shake={shakeRowIndex === guesses.length}
+          isOpponent={isOpponent}
         />
       )}
       {empties.map((_, i) => (
@@ -40,6 +43,7 @@ export default function Board({ guesses, currentGuess, solution, shakeRowIndex, 
           solution={solution}
           isCurrentRow={false}
           isSubmitted={false}
+          isOpponent={isOpponent}
         />
       ))}
     </div>
