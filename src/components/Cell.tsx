@@ -26,28 +26,28 @@ export default function Cell({ value, status, animatePop, animateFlip, animateBo
     }
   }, [status, animateFlip, animationDelay]);
 
-  let bgClass = 'bg-white';
-  let borderClass = 'border-[#d3d6da]';
-  let textClass = 'text-black';
+  let bgClass = 'bg-white dark:bg-gray-900';
+  let borderClass = 'border-[#d3d6da] dark:border-gray-700';
+  let textClass = 'text-black dark:text-white';
 
   if (displayStatus === 'tbd') {
-    borderClass = 'border-[#878a8c]';
+    borderClass = 'border-[#878a8c] dark:border-gray-500';
   } else if (displayStatus === 'absent') {
-    bgClass = 'bg-[#787c7e]';
-    borderClass = 'border-[#787c7e]';
+    bgClass = 'bg-[#787c7e] dark:bg-gray-700';
+    borderClass = 'border-[#787c7e] dark:border-gray-700';
     textClass = 'text-white';
   } else if (displayStatus === 'present') {
-    bgClass = 'bg-[#c9b458]';
-    borderClass = 'border-[#c9b458]';
+    bgClass = 'bg-[#c9b458] dark:bg-yellow-600';
+    borderClass = 'border-[#c9b458] dark:border-yellow-600';
     textClass = 'text-white';
   } else if (displayStatus === 'correct') {
-    bgClass = 'bg-[#6aaa64]';
-    borderClass = 'border-[#6aaa64]';
+    bgClass = 'bg-[#6aaa64] dark:bg-green-600';
+    borderClass = 'border-[#6aaa64] dark:border-green-600';
     textClass = 'text-white';
   }
 
   const classes = `
-    w-14 h-14 sm:w-16 sm:h-16 border-2 flex items-center justify-center text-3xl font-bold uppercase select-none
+    w-14 h-14 sm:w-16 sm:h-16 border-2 flex items-center justify-center text-3xl font-bold uppercase select-none transition-colors duration-200
     ${bgClass} ${borderClass} ${textClass}
     ${animatePop ? 'cell-pop' : ''}
     ${animateBounce ? 'cell-bounce' : ''}

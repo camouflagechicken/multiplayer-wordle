@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
 }
@@ -7,8 +9,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
-  color: #1a1a1b;
+  @apply bg-white dark:bg-gray-900 text-[#1a1a1b] dark:text-white;
   font-family: var(--font-sans);
   overscroll-behavior: none;
 }

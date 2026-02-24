@@ -24,17 +24,17 @@ export default function Keyboard({ onChar, onDelete, onEnter, keyStatuses }: Key
             const isBackspace = key === 'Backspace';
             const status = keyStatuses[key];
             
-            let bgClass = 'bg-[#d3d6da] hover:bg-[#c3c6ca]';
-            let textClass = 'text-black';
+            let bgClass = 'bg-[#d3d6da] dark:bg-gray-700 hover:bg-[#c3c6ca] dark:hover:bg-gray-600';
+            let textClass = 'text-black dark:text-white';
             
             if (status === 'correct') {
-              bgClass = 'bg-[#6aaa64]';
+              bgClass = 'bg-[#6aaa64] dark:bg-green-600';
               textClass = 'text-white';
             } else if (status === 'present') {
-              bgClass = 'bg-[#c9b458]';
+              bgClass = 'bg-[#c9b458] dark:bg-yellow-600';
               textClass = 'text-white';
             } else if (status === 'absent') {
-              bgClass = 'bg-[#787c7e]';
+              bgClass = 'bg-[#787c7e] dark:bg-gray-800';
               textClass = 'text-white';
             }
 

@@ -5,7 +5,7 @@ import { evaluateGuess, LetterState } from './utils';
 import Board from './components/Board';
 import Keyboard from './components/Keyboard';
 import Toast from './components/Toast';
-import { HelpCircle, BarChart2, Settings } from 'lucide-react';
+import { HelpCircle, BarChart2, Settings, Moon, Sun, Users, User } from 'lucide-react';
 
 const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
 
@@ -68,6 +68,8 @@ export default function App() {
   const [keyStatuses, setKeyStatuses] = useState<{ [key: string]: LetterState }>({});
   const [isRevealing, setIsRevealing] = useState(false);
   const [opponents, setOpponents] = useState<{ [id: string]: any[] }>({});
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isPracticeMode, setIsPracticeMode] = useState(false);
 
   const socketRef = useRef<Socket | null>(null);
   const userIdRef = useRef<string>(`user_${Math.random().toString(36).substring(2, 9)}`);
@@ -96,6 +98,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (isPracticeMode) return;
+    
     const interval = setInterval(() => {
       const now = Date.now();
       const currentEpoch = Math.floor(now / FIFTEEN_MINUTES_MS);
@@ -125,7 +129,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [epoch]);
+  }, [epoch, isPracticeMode]);
 
   const showToast = (message: string, duration = 2000) => {
     setToastMessage(message);
@@ -176,7 +180,7 @@ export default function App() {
       }));
     });
 
-    if (socketRef.current) {
+    if (!isPracticeMode && socketRef.current) {
       socketRef.current.emit('playerStateUpdate', {
         id: userIdRef.current,
         grid: fullGrid
@@ -206,13 +210,78 @@ export default function App() {
       if (currentGuess === solution) {
         setGameStatus('won');
         setTimeout(() => showToast('Splendid!', 3000), 1500); // Wait for bounce
+        
+        if (isPracticeMode) {
+          setTimeout(() => {
+            setSolution(ANSWERS[Math.floor(Math.random() * ANSWERS.length)]);
+            setGuesses([]);
+            setCurrentGuess('');
+            setGameStatus('playing');
+            setKeyStatuses({});
+            setShakeRowIndex(null);
+            setToastMessage(null);
+            setIsRevealing(false);
+          }, 2000);
+        }
       } else if (newGuesses.length === 6) {
         setGameStatus('lost');
         setTimeout(() => showToast(solution.toUpperCase(), 5000), 500);
+        
+        if (isPracticeMode) {
+          setTimeout(() => {
+            setSolution(ANSWERS[Math.floor(Math.random() * ANSWERS.length)]);
+            setGuesses([]);
+            setCurrentGuess('');
+            setGameStatus('playing');
+            setKeyStatuses({});
+            setShakeRowIndex(null);
+            setToastMessage(null);
+            setIsRevealing(false);
+          }, 2000);
+        }
       }
     }, 1500); // 5 letters * 300ms delay
 
-  }, [currentGuess, gameStatus, guesses, isRevealing, solution, keyStatuses]);
+  }, [currentGuess, gameStatus, guesses, isRevealing, solution, keyStatuses, isPracticeMode]);
+
+  useEffect(() => {
+    if (isPracticeMode) {
+      setSolution(ANSWERS[Math.floor(Math.random() * ANSWERS.length)]);
+      setGuesses([]);
+      setCurrentGuess('');
+      setGameStatus('playing');
+      setKeyStatuses({});
+      setShakeRowIndex(null);
+      setToastMessage(null);
+      setIsRevealing(false);
+    } else {
+      const currentEpoch = getCurrentEpoch();
+      setEpoch(currentEpoch);
+      setSolution(getWordForEpoch(currentEpoch));
+      setGuesses([]);
+      setCurrentGuess('');
+      setGameStatus('playing');
+      setKeyStatuses({});
+      setShakeRowIndex(null);
+      setToastMessage(null);
+      setIsRevealing(false);
+      
+      if (socketRef.current) {
+        socketRef.current.emit('playerStateUpdate', {
+          id: userIdRef.current,
+          grid: []
+        });
+      }
+    }
+  }, [isPracticeMode]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -232,22 +301,36 @@ export default function App() {
   }, [onChar, onDelete, onEnter]);
 
   return (
-    <div className="flex flex-col h-screen bg-white text-black font-sans">
-      <header className="flex items-center justify-between px-4 h-12 sm:h-16 border-b border-[#d3d6da] relative">
+    <div className="flex flex-col h-screen bg-white dark:bg-gray-900 text-black dark:text-white font-sans transition-colors duration-200">
+      <header className="flex items-center justify-between px-4 h-12 sm:h-16 border-b border-[#d3d6da] dark:border-gray-800 relative">
         <div className="flex gap-2">
-          <HelpCircle className="w-6 h-6 text-[#878a8c] cursor-pointer" />
+          <HelpCircle className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
         </div>
         <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-wider uppercase">
             Wordle
           </h1>
-          <div className="text-xs font-mono text-gray-500 mt-[-2px] sm:mt-[-4px]">
-            {formatTime(timeLeft)}
+          <div className="text-xs font-mono text-gray-500 dark:text-gray-400 mt-[-2px] sm:mt-[-4px]">
+            {isPracticeMode ? 'PRACTICE' : formatTime(timeLeft)}
           </div>
         </div>
-        <div className="flex gap-2">
-          <BarChart2 className="w-6 h-6 text-[#878a8c] cursor-pointer" />
-          <Settings className="w-6 h-6 text-[#878a8c] cursor-pointer" />
+        <div className="flex gap-2 items-center">
+          <button onClick={() => setIsPracticeMode(!isPracticeMode)} className="focus:outline-none mr-1">
+            {isPracticeMode ? (
+              <User className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
+            ) : (
+              <Users className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
+            )}
+          </button>
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="focus:outline-none">
+            {isDarkMode ? (
+              <Sun className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
+            ) : (
+              <Moon className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
+            )}
+          </button>
+          <BarChart2 className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
+          <Settings className="w-6 h-6 text-[#878a8c] dark:text-gray-400 cursor-pointer" />
         </div>
       </header>
 
@@ -255,32 +338,34 @@ export default function App() {
 
       <div className="flex-grow flex flex-row overflow-hidden relative">
         {/* Floating Opponent Badges */}
-        <div className="absolute left-2 sm:left-4 top-4 bottom-4 w-16 sm:w-20 flex flex-col gap-3 overflow-y-auto pointer-events-none z-20">
-          {Object.entries(opponents).map(([id, grid]) => {
-            const opponentGuesses = (grid as any[]).map(row => row.map((cell: any) => cell.char).join(''));
-            const hasWon = opponentGuesses.length > 0 && opponentGuesses[opponentGuesses.length - 1] === solution;
-            
-            return (
-              <div key={id} className="flex flex-col items-center bg-white/90 backdrop-blur-sm p-1.5 sm:p-2 rounded-xl shadow-sm border border-gray-200 pointer-events-auto">
-                <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 mb-1 uppercase tracking-wider">
-                  {id.slice(0, 4)}
-                </div>
-                <div className="flex justify-center h-[55px] sm:h-[65px] overflow-hidden">
-                  <div className="transform scale-[0.13] sm:scale-[0.15] origin-top w-[350px]">
-                    <Board
-                      guesses={opponentGuesses}
-                      currentGuess=""
-                      solution={solution}
-                      shakeRowIndex={null}
-                      winRowIndex={hasWon ? opponentGuesses.length - 1 : null}
-                      isOpponent={true}
-                    />
+        {!isPracticeMode && (
+          <div className="absolute left-2 sm:left-4 top-4 bottom-4 w-16 sm:w-20 flex flex-col gap-3 overflow-y-auto pointer-events-none z-20">
+            {Object.entries(opponents).map(([id, grid]) => {
+              const opponentGuesses = (grid as any[]).map(row => row.map((cell: any) => cell.char).join(''));
+              const hasWon = opponentGuesses.length > 0 && opponentGuesses[opponentGuesses.length - 1] === solution;
+              
+              return (
+                <div key={id} className="flex flex-col items-center bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-1.5 sm:p-2 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 pointer-events-auto transition-colors duration-200">
+                  <div className="text-[9px] sm:text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                    {id.slice(0, 4)}
+                  </div>
+                  <div className="flex justify-center h-[55px] sm:h-[65px] overflow-hidden">
+                    <div className="transform scale-[0.13] sm:scale-[0.15] origin-top w-[350px]">
+                      <Board
+                        guesses={opponentGuesses}
+                        currentGuess=""
+                        solution={solution}
+                        shakeRowIndex={null}
+                        winRowIndex={hasWon ? opponentGuesses.length - 1 : null}
+                        isOpponent={true}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         <main className="flex-grow flex flex-col items-center justify-between w-full max-w-[500px] mx-auto pt-8 pb-4 relative z-10">
           <Board

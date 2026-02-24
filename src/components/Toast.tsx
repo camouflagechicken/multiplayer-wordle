@@ -9,7 +9,7 @@ export default function Toast({ message }: ToastProps) {
 
   return (
     <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-black text-white px-4 py-3 rounded font-bold text-sm shadow-lg transition-opacity duration-300">
+      <div className="bg-black dark:bg-white text-white dark:text-black px-4 py-3 rounded font-bold text-sm shadow-lg transition-opacity duration-300">
         {message}
       </div>
     </div>
